@@ -1,97 +1,65 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Lector de Códigos de Barras - App Móvil - Receptor PC
 
-# Getting Started
+Una aplicación React Native para escanear códigos de barras (EAN-13) con la cámara del móvil y enviarlos automáticamente a un servidor local en el PC, donde se escriben como si se teclearan.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Ideal para entornos de almacén, recepción de mercancía o cualquier proceso donde se necesite introducir códigos rápidamente sin tocar el teclado del ordenador.
 
-## Step 1: Start Metro
+## Características principales
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- Escaneo en tiempo real con `react-native-vision-camera`.
+- Modo automático (escanea continuamente) o manual (mantener pulsado un botón para escanear).
+- Enfoque fijo para mayor estabilidad al leer códigos a distancia fija.
+- Configuración de la URL del servidor (IP + puerto).
+- Opción para activar/desactivar el envío automático al servidor.
+- Historial de códigos escaneados (persistente aunque se cierre la app).
+- Copiar código al portapapeles con un toque.
+- Reenviar código individual al servidor.
+- Borrar entrada individual o limpiar todo el historial.
+- Mensajes tipo toast para feedback (copiado, etc.).
+- Totalmente funcional en versión release (APK instalable).
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Requisitos
 
-```sh
-# Using npm
-npm start
+- Android 6.0 o superior (probado hasta Android 14).
+- El móvil y el PC deben estar en la **misma red WiFi**.
+- En el PC debe ejecutarse el servidor Python.
 
-# OR using Yarn
-yarn start
-```
+## Instalación
 
-## Step 2: Build and run your app
+1. Descarga el APK `ReceptorCodigos.apk`.
+2. En el móvil, activa "Instalar apps de fuentes desconocidas" para el explorador/archivo que uses.
+3. Abre el APK e instálalo.
+4. Abre la app → concede permiso de cámara.
+5. Pulsa el icono de configuración (arriba derecha).
+6. Introduce la URL del servidor (ej: `http://192.168.1.100:5000`).
+7. Marca o desmarca "Enviar código al servidor" según necesites.
+8. ¡Listo! Escanea códigos y verás cómo aparecen en el PC.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## Uso
 
-### Android
+- **Escaneo automático**: la app escanea continuamente en cuanto detecta un código válido de 13 dígitos.
+- **Escaneo manual**: activa la opción en configuración → aparece un botón grande abajo → mantén pulsado para escanear.
+- **Historial**: icono arriba izquierda → lista de códigos escaneados con opciones de copiar, reenviar o borrar.
+- **Configuración**: icono arriba derecha → cambia IP/puerto y modo de escaneo.
 
-```sh
-# Using npm
-npm run android
+## Servidor en PC
 
-# OR using Yarn
-yarn android
-```
+La app envía los códigos vía POST a `/barcode` en el servidor local (PC).
 
-### iOS
+## Construido con
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+- React Native
+- react-native-vision-camera
+- react-native-permissions
+- @react-native-async-storage/async-storage
+- @react-native-clipboard/clipboard
+- react-native-toast-message
+- react-native-vector-icons
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+## Autor
 
-```sh
-bundle install
-```
+Miquel Grau.
 
-Then, and every time you update your native dependencies, run:
+## Licencia
 
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Libre
