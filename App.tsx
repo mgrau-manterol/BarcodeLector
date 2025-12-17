@@ -54,10 +54,7 @@ export default function App() {
                 if (value && value !== ultimoCodigo && value.length === 13) {
                     setUltimoCodigo(value);
                     sendToApi(value);
-                    setHistorial((prev) => {
-                        const nuevo = [value, ...prev];
-                        return nuevo.slice(0, 500);
-                    });
+                    setHistorial((prev) => [value, ...prev]);
                 }
             }
         },
