@@ -1,8 +1,14 @@
-# Lector de Códigos de Barras - App Móvil - Receptor PC
+# Lector de Códigos de Barras - App Móvil + Receptor PC
 
 Una aplicación React Native para escanear códigos de barras (EAN-13) con la cámara del móvil y enviarlos automáticamente a un servidor local en el PC, donde se escriben como si se teclearan.
 
 Ideal para entornos de almacén, recepción de mercancía o cualquier proceso donde se necesite introducir códigos rápidamente sin tocar el teclado del ordenador.
+
+[![Descargar APK para Android](https://img.shields.io/badge/Download-APK-brightgreen?style=for-the-badge&logo=android)](https://github.com/mgrau-manterol/BarcodeLector/releases/latest/download/lector.apk)
+[![Descargar Instalador Windows (.msi)](https://img.shields.io/badge/Download-MSI-blue?style=for-the-badge&logo=windows)](https://github.com/mgrau-manterol/BarcodeLector/releases/latest/download/ReceptorCodigos.msi)
+
+> **Versión actual: 1.0.0**  
+> Descargas directas de la última versión estable.
 
 ## Características principales
 
@@ -24,27 +30,17 @@ Ideal para entornos de almacén, recepción de mercancía o cualquier proceso do
 - El móvil y el PC deben estar en la **misma red WiFi**.
 - En el PC debe ejecutarse el servidor Python.
 
-## Instalación
+## Instalación y Uso
 
-1. Descarga el APK `ReceptorCodigos.apk`.
-2. En el móvil, activa "Instalar apps de fuentes desconocidas" para el explorador/archivo que uses.
-3. Abre el APK e instálalo.
-4. Abre la app → concede permiso de cámara.
-5. Pulsa el icono de configuración (arriba derecha).
-6. Introduce la URL del servidor (ej: `http://192.168.1.100:5000`).
-7. Marca o desmarca "Enviar código al servidor" según necesites.
-8. ¡Listo! Escanea códigos y verás cómo aparecen en el PC.
-
-## Uso
-
-- **Escaneo automático**: la app escanea continuamente en cuanto detecta un código válido de 13 dígitos.
-- **Escaneo manual**: activa la opción en configuración → aparece un botón grande abajo → mantén pulsado para escanear.
-- **Historial**: icono arriba izquierda → lista de códigos escaneados con opciones de copiar, reenviar o borrar.
-- **Configuración**: icono arriba derecha → cambia IP/puerto y modo de escaneo.
+1. **App Móvil (Android)**: Descarga e instala el APK desde arriba.
+2. **Receptor en PC (Windows)**: Descarga e instala el .msi desde arriba (crea accesos directos y se instala en Program Files).
+3. Ejecuta el receptor en el PC (se inicia automáticamente o desde el menú).
+4. En la app móvil: Configuración → pon la IP del PC (la muestra el receptor al iniciarse).
+5. ¡Escanea y los códigos se escribirán solos en el PC!
 
 ## Servidor en PC
 
-La app envía los códigos vía POST a `/barcode` en el servidor local (PC).
+Incluido en el instalador .msi. Usa Flask + Waitress + pyautogui.
 
 ## Construido con
 
@@ -55,6 +51,7 @@ La app envía los códigos vía POST a `/barcode` en el servidor local (PC).
 - @react-native-clipboard/clipboard
 - react-native-toast-message
 - react-native-vector-icons
+- Python (Flask, Waitress, pyautogui)
 
 ## Autor
 
@@ -62,4 +59,4 @@ Miquel Grau.
 
 ## Licencia
 
-Libre
+Libre para uso interno.
