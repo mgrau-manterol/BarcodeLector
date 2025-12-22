@@ -5,7 +5,7 @@ Una aplicación React Native para escanear códigos de barras (EAN-13) con la c�
 Ideal para entornos de almacén, recepción de mercancía o cualquier proceso donde se necesite introducir códigos rápidamente sin tocar el teclado del ordenador.
 
 [![Descargar APK para Android](https://img.shields.io/badge/Download-APK-brightgreen?style=for-the-badge&logo=android)](https://github.com/mgrau-manterol/BarcodeLector/releases/latest/download/lector.apk)
-[![Descargar Instalador Windows (.msi)](https://img.shields.io/badge/Download-MSI-blue?style=for-the-badge&logo=windows)](https://github.com/mgrau-manterol/BarcodeLector/releases/latest/download/ReceptorCodigosInstalador.exe)
+[![Descargar Instalador Windows (.exe)](https://img.shields.io/badge/Download-EXE-blue?style=for-the-badge&logo=windows)](https://github.com/mgrau-manterol/BarcodeLector/releases/latest/download/ReceptorCodigosInstalador.exe)
 
 > **Versión actual: 1.0.0**  
 > Descargas directas de la última versión estable.
