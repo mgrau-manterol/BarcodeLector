@@ -9,7 +9,8 @@ import {
     TextInput,
     Dimensions,
     FlatList,
-    Switch
+    Switch,
+    AppState
 } from 'react-native';
 import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-camera';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
@@ -28,6 +29,8 @@ export default function App() {
     const cameraRef = useRef<Camera>(null);
 
     const [tienePermiso, setTienePermiso] = useState(false);
+    const [isForeground, setIsForeground] = useState(true);
+    const [cameraReady, setCameraReady] = useState(false);
     const [ultimoCodigo, setUltimoCodigo] = useState<string | null>(null);
 
     const [serverUrl, setServerUrl] = useState<string | null>(null);
@@ -74,18 +77,14 @@ export default function App() {
     }, [historial]);
 
     useEffect(() => {
-        const requestCameraPermission = async () => {
-            try {
-                let status = await check(PERMISSIONS.ANDROID.CAMERA);
-                if (status === RESULTS.DENIED || status === RESULTS.BLOCKED) {
-                    status = await request(PERMISSIONS.ANDROID.CAMERA);
-                }
-                setTienePermiso(status === RESULTS.GRANTED);
-            } catch (error) {
-                console.error(error);
-                setTienePermiso(false);
-            }
-        };
+        const sub = AppState.addEventListener('change', state => {
+            setIsForeground(state === 'active');
+        });
+
+        return () => sub.remove();
+    }, []);
+
+    useEffect(() => {
         requestCameraPermission();
 
         const cargarConfig = async () => {
@@ -123,6 +122,19 @@ export default function App() {
     }, []);
 
     useEffect(() => {
+        if (!tienePermiso || !dispositivo || !isForeground) {
+            setCameraReady(false);
+            return;
+        }
+
+        const t = setTimeout(() => {
+            setCameraReady(true);
+        }, 300);
+
+        return () => clearTimeout(t);
+    }, [tienePermiso, dispositivo, isForeground]);
+
+    useEffect(() => {
         if (ultimoCodigo) {
             const timer = setTimeout(() => setUltimoCodigo(null), 2000);
             return () => clearTimeout(timer);
@@ -135,6 +147,19 @@ export default function App() {
             cameraRef.current.focus({ x: width / 2, y: height / 2 });
         }
     }, [tienePermiso, dispositivo]);
+
+    const requestCameraPermission = async () => {
+        try {
+            let status = await check(PERMISSIONS.ANDROID.CAMERA);
+            if (status === RESULTS.DENIED || status === RESULTS.BLOCKED) {
+                status = await request(PERMISSIONS.ANDROID.CAMERA);
+            }
+            setTienePermiso(status === RESULTS.GRANTED);
+        } catch (error) {
+            console.error(error);
+            setTienePermiso(false);
+        }
+    };
 
     const sendToApi = async (code: string) => {
         if (enviarAlServidor) {
@@ -391,10 +416,11 @@ export default function App() {
 
             <View style={StyleSheet.absoluteFill}>
                 <Camera
+                    key={`${dispositivo.id}-${cameraReady}`}
                     ref={cameraRef}
                     style={StyleSheet.absoluteFill}
                     device={dispositivo}
-                    isActive={true}
+                    isActive={cameraReady}
                     codeScanner={codeScanner}
                     torch="off"
                     zoom={1}
