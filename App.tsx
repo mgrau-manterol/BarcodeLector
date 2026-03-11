@@ -23,6 +23,7 @@ const HISTORIAL_KEY = 'historial_codigos';
 const SERVER_URL_KEY = 'server_url';
 const MODO_ESCANEO_KEY = 'modo_escaneo';
 const ENVIAR_AL_SERVIDOR_KEY = 'enviar_al_servidor';
+const MODO_AREA_VISIBLE_KEY = 'modo_area_visible';
 
 export default function App() {
     const dispositivo = useCameraDevice('back');
@@ -47,17 +48,53 @@ export default function App() {
     const [tempModoManual, setTempModoManual] = useState(modoManual);
     const [escaneandoAhora, setEscaneandoAhora] = useState(false);
 
+    const [areaEscaneoVisible, setAreaEscaneoVisible] = useState(false);
+    const [tempAreaEscaneoVisible, setTempAreaEscaneoVisible] = useState(areaEscaneoVisible);
+
+
     const codeScanner = useCodeScanner({
         codeTypes: ['ean-13'],
-        onCodeScanned: (codes) => {
+        onCodeScanned: (codes, frame) => {
             if (modoManual && !escaneandoAhora) return;
 
             if (codes.length > 0) {
-                const value = codes[0].value;
-                if (value && value !== ultimoCodigo && value.length === 13) {
-                    setUltimoCodigo(value);
-                    sendToApi(value);
-                    setHistorial((prev) => [value, ...prev]);
+                if (areaEscaneoVisible) {
+                    const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+                    const scanMinX = 0.35;
+                    const scanMaxX = 0.65;
+                    const scanMinY = 0.10;
+                    const scanMaxY = 0.90;
+
+                    const codesEnArea = codes.filter(code => {
+                        if (!code.corners) return false;
+
+                        const centerX = code.corners.reduce((sum, c) => sum + c.y, 0) / 4 / frame.width;
+                        const centerY = code.corners.reduce((sum, c) => sum + c.x, 0) / 4 / frame.height;
+
+                        return (
+                            centerX >= scanMinX &&
+                            centerX <= scanMaxX &&
+                            centerY >= scanMinY &&
+                            centerY <= scanMaxY
+                        );
+                    });
+
+                    if (codesEnArea.length > 0) {
+                        const value = codesEnArea[0].value;
+                        if (value && value !== ultimoCodigo && value.length === 13) {
+                            setUltimoCodigo(value);
+                            sendToApi(value);
+                            setHistorial((prev) => [value, ...prev]);
+                        }
+                    }
+                } else {
+                    const value = codes[0].value;
+                    if (value && value !== ultimoCodigo && value.length === 13) {
+                        setUltimoCodigo(value);
+                        sendToApi(value);
+                        setHistorial((prev) => [value, ...prev]);
+                    }
                 }
             }
         },
@@ -112,6 +149,13 @@ export default function App() {
                     const enviar = enviarServ === 'true';
                     setEnviarAlServidor(enviar);
                     setTempEnviarAlServidor(enviar);
+                }
+
+                const areaVisible = await AsyncStorage.getItem(MODO_AREA_VISIBLE_KEY);
+                if (areaVisible !== null) {
+                    const visible = areaVisible === 'true';
+                    setAreaEscaneoVisible(visible);
+                    setTempAreaEscaneoVisible(visible);
                 }
             } catch (error) {
                 console.error('Error cargando configuración', error);
@@ -197,6 +241,9 @@ export default function App() {
         setEnviarAlServidor(tempEnviarAlServidor);
         await AsyncStorage.setItem(ENVIAR_AL_SERVIDOR_KEY, tempEnviarAlServidor ? 'true' : 'false');
 
+        setAreaEscaneoVisible(tempAreaEscaneoVisible);
+        await AsyncStorage.setItem(MODO_AREA_VISIBLE_KEY, tempAreaEscaneoVisible ? 'true' : 'false');
+
         setModalConfigVisible(false);
     };
 
@@ -237,6 +284,16 @@ export default function App() {
                             <Switch
                                 value={tempModoManual}
                                 onValueChange={setTempModoManual}
+                                trackColor={{ false: '#767577', true: '#007AFF' }}
+                                thumbColor={tempModoManual ? '#fff' : '#f4f3f4'}
+                            />
+                        </View>
+
+                        <View style={styles.opcionRow}>
+                            <Text style={styles.opcionTexto}>Área de escaneo</Text>
+                            <Switch
+                                value={tempAreaEscaneoVisible}
+                                onValueChange={setTempAreaEscaneoVisible}
                                 trackColor={{ false: '#767577', true: '#007AFF' }}
                                 thumbColor={tempModoManual ? '#fff' : '#f4f3f4'}
                             />
@@ -425,6 +482,25 @@ export default function App() {
                     torch="off"
                     zoom={1}
                 />
+
+                {(cameraReady && areaEscaneoVisible) && (
+                    <View style={styles.scanAreaContainer}>
+                        <View style={styles.scanArea}>
+                            <View style={[styles.corner, styles.cornerTopLeft]} />
+                            <View style={[styles.corner, styles.cornerTopRight]} />
+                            <View style={[styles.corner, styles.cornerBottomLeft]} />
+                            <View style={[styles.corner, styles.cornerBottomRight]} />
+
+                            <View style={styles.scanLine} />
+                        </View>
+
+                        {/* Overlay oscuro alrededor */}
+                        <View style={styles.overlayTop} />
+                        <View style={styles.overlayBottom} />
+                        <View style={styles.overlayLeft} />
+                        <View style={styles.overlayRight} />
+                    </View>
+                )}
 
                 {modoManual && (
                     <TouchableOpacity
@@ -621,5 +697,102 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f0f0',
         color: '#888',
         borderColor: '#ddd',
+    },
+    scanAreaContainer: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    scanArea: {
+        width: '80%',
+        height: '30%',
+        borderWidth: 2,
+        borderColor: 'rgba(0, 122, 255, 0.8)',
+        borderRadius: 10,
+        position: 'relative',
+    },
+    corner: {
+        position: 'absolute',
+        width: 30,
+        height: 30,
+        borderColor: '#00ff00',
+        borderWidth: 4,
+    },
+    cornerTopLeft: {
+        top: -2,
+        left: -2,
+        borderRightWidth: 0,
+        borderBottomWidth: 0,
+    },
+    cornerTopRight: {
+        top: -2,
+        right: -2,
+        borderLeftWidth: 0,
+        borderBottomWidth: 0,
+    },
+    cornerBottomLeft: {
+        bottom: -2,
+        left: -2,
+        borderRightWidth: 0,
+        borderTopWidth: 0,
+    },
+    cornerBottomRight: {
+        bottom: -2,
+        right: -2,
+        borderLeftWidth: 0,
+        borderTopWidth: 0,
+    },
+    scanLine: {
+        position: 'absolute',
+        top: '50%',
+        left: 0,
+        right: 0,
+        height: 2,
+        backgroundColor: '#00ff00',
+        opacity: 0.7,
+    },
+    scanText: {
+        position: 'absolute',
+        bottom: -40,
+        alignSelf: 'center',
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        borderRadius: 8,
+    },
+    overlayTop: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '35%',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    overlayBottom: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '35%',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    overlayLeft: {
+        position: 'absolute',
+        top: '35%',
+        left: 0,
+        width: '10%',
+        height: '30%',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    overlayRight: {
+        position: 'absolute',
+        top: '35%',
+        right: 0,
+        width: '10%',
+        height: '30%',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
 });
